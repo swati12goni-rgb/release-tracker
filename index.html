@@ -107,7 +107,8 @@
 </footer>
 
 <script>
-// Load saved data when page opens
+const API_URL = "YOUR_GOOGLE_SCRIPT_WEBAPP_URL"; // replace with your script URL
+
 window.onload = loadData;
 
 function addRow(rowData = null) {
@@ -151,7 +152,7 @@ function makeEditable(row, isNew = false, rowData = {}) {
 
     const saveBtn = document.createElement('button');
     saveBtn.textContent = isNew ? "Save" : "Update";
-    saveBtn.onclick = () => {
+    saveBtn.onclick = async () => {
         const data = {
             date: cells[0].querySelector('input').value,
             build: cells[1].querySelector('input').value,
@@ -159,58 +160,43 @@ function makeEditable(row, isNew = false, rowData = {}) {
             platform: cells[3].querySelector('select').value,
             note: cells[4].querySelector('input').value
         };
-        fillRow(row, data);
-        saveData();
+        await saveData(data);
+        location.reload();
     };
     actionCell.appendChild(saveBtn);
 }
 
 function fillRow(row, data) {
-    row.cells[0].textContent = data.date;
-    row.cells[1].textContent = data.build;
-    row.cells[2].textContent = data.desc;
-    row.cells[3].textContent = data.platform;
-    row.cells[4].textContent = data.note;
+    row.cells[0].textContent = data[0];
+    row.cells[1].textContent = data[1];
+    row.cells[2].textContent = data[2];
+    row.cells[3].textContent = data[3];
+    row.cells[4].textContent = data[4];
 
     const actionCell = row.cells[5];
     actionCell.innerHTML = '';
 
-    
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = "Delete";
     deleteBtn.onclick = () => {
         row.remove();
-        saveData();
     };
     actionCell.appendChild(deleteBtn);
 }
 
-// Save all rows to localStorage
-function saveData() {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
-    const rows = tableBody.rows;
-    let data = [];
-
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].cells;
-        data.push({
-            date: cells[0].textContent,
-            build: cells[1].textContent,
-            desc: cells[2].textContent,
-            platform: cells[3].textContent,
-            note: cells[4].textContent
-        });
-    }
-    localStorage.setItem("releaseData", JSON.stringify(data));
+async function saveData(data) {
+    await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+    });
 }
 
-// Load from localStorage
-function loadData() {
-    const data = JSON.parse(localStorage.getItem("releaseData")) || [];
-    data.forEach(row => addRow(row));
+async function loadData() {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    data.slice(1).forEach(row => addRow(row));
 }
 </script>
 
 </body>
 </html>
-
