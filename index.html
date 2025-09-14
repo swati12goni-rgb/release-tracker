@@ -59,7 +59,7 @@
       loadTableData();
     };
 
-    function addRow(date = "", note = "") {
+    function addRow(date = "", note = "", saved = false) {
       let tableBody = document.getElementById("tableBody");
       let row = tableBody.insertRow();
 
@@ -67,12 +67,32 @@
       let cell2 = row.insertCell(1);
       let cell3 = row.insertCell(2);
 
-      cell1.innerHTML = `<input type="date" value="${date}">`;
-      cell2.innerHTML = `<input type="text" value="${note}" placeholder="Enter release note">`;
-      cell3.innerHTML = `
-        <button class="save-btn" onclick="saveData()">Save</button>
-        <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
-      `;
+      if (saved) {
+        // Show text only for saved data
+        cell1.textContent = date;
+        cell2.textContent = note;
+        cell3.innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
+      } else {
+        // Show input fields for new row
+        cell1.innerHTML = `<input type="date" value="${date}">`;
+        cell2.innerHTML = `<input type="text" value="${note}" placeholder="Enter release note">`;
+        cell3.innerHTML = `<button class="save-btn" onclick="saveRow(this)">Save</button>`;
+      }
+    }
+
+    function saveRow(button) {
+      let row = button.parentElement.parentElement;
+      let date = row.cells[0].querySelector("input").value;
+      let note = row.cells[1].querySelector("input").value;
+
+      if (!date && !note) return; // ignore empty row
+
+      // Replace inputs with text
+      row.cells[0].textContent = date;
+      row.cells[1].textContent = note;
+      row.cells[2].innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
+
+      saveData();
     }
 
     function saveData() {
@@ -81,13 +101,9 @@
       let savedData = [];
 
       for (let i = 0; i < rows.length; i++) {
-        let date = rows[i].cells[0].querySelector("input").value;
-        let note = rows[i].cells[1].querySelector("input").value;
-
-        // only save if there is content
-        if (date || note) {
-          savedData.push({ date, note });
-        }
+        let date = rows[i].cells[0].textContent;
+        let note = rows[i].cells[1].textContent;
+        savedData.push({ date, note });
       }
 
       localStorage.setItem("releaseData", JSON.stringify(savedData));
@@ -96,19 +112,17 @@
     function loadTableData() {
       let savedData = JSON.parse(localStorage.getItem("releaseData")) || [];
       let tableBody = document.getElementById("tableBody");
-      tableBody.innerHTML = ""; // clear table before loading
+      tableBody.innerHTML = "";
 
-      if (savedData.length > 0) {
-        savedData.forEach(item => {
-          addRow(item.date, item.note);
-        });
-      }
+      savedData.forEach(item => {
+        addRow(item.date, item.note, true);
+      });
     }
 
     function deleteRow(button) {
       let row = button.parentElement.parentElement;
       row.remove();
-      saveData(); // update storage after deletion
+      saveData();
     }
   </script>
 </body>
