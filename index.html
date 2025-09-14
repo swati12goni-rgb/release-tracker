@@ -1,218 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Release Tracker</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Tracker</title>
+  <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin:0;
-        padding:0;
-        background:#f4f6f8;
-        color:#333;
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
     }
-    header {
-        background:#2F4F4F;
-        color:white;
-        padding:20px 0;
-        text-align:center;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-    header h1 { margin:0; font-size:28px; letter-spacing:1px; }
-    main {
-        padding:20px;
-        max-width:1200px;
-        margin:auto;
+    h2 {
+      text-align: center;
     }
     table {
-        width:100%;
-        border-collapse:collapse;
-        background:#fff;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
     }
     th, td {
-        padding:12px 15px;
-        border:1px solid #ddd;
-        font-size:14px;
+      padding: 10px;
+      text-align: center;
     }
-    th { background:#2F4F4F; color:white; text-align:center; }
-    td { text-align:left; }
-    td input, td select {
-        width: 100%;
-        padding:5px;
-        font-size:14px;
-        border:1px solid #ccc;
-        border-radius:4px;
-        box-sizing:border-box;
+    button {
+      padding: 5px 10px;
+      margin: 2px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
     }
-    td.action button {
-        padding:5px 10px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
-    }
-    td.action button:hover { background:#556B2F; }
-    footer {
-        background:#2F4F4F;
-        color:white;
-        text-align:center;
-        padding:15px 0;
-        margin-top:40px;
-        font-size:14px;
-        letter-spacing:0.5px;
-    }
-    #addRowBtn {
-        margin-top:15px;
-        padding:8px 15px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
-        font-weight:600;
-        transition:0.3s;
-    }
-    #addRowBtn:hover { background:#556B2F; }
-</style>
+    .save-btn { background: #28a745; color: white; }
+    .delete-btn { background: #dc3545; color: white; }
+  </style>
 </head>
 <body>
+  <h2>📌 Release Tracker</h2>
 
-<header>
-    <h1>Release Tracker</h1>
-</header>
+  <table id="releaseTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Release Note</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-<main>
-    <table id="buildTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Build</th>
-                <th>Description</th>
-                <th>Platform</th>
-                <th>Note</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <button id="addRowBtn" onclick="addRow()">Add New Row</button>
-</main>
+  <button onclick="addRow()">➕ Add New Release</button>
 
-<footer>
-    &copy; 2025 Release Tracker. All Rights Reserved.
-</footer>
-
-<script>
-// Save table data to localStorage
-function saveTableData() {
-    const tableBody = document.querySelector("#buildTable tbody");
-    const rows = [];
-    tableBody.querySelectorAll("tr").forEach(tr => {
-        const cells = Array.from(tr.querySelectorAll("td")).map(td => td.textContent);
-        rows.push(cells);
-    });
-    localStorage.setItem("releaseData", JSON.stringify(rows));
-}
-
-// Load table data from localStorage
-function loadTableData() {
-    const savedData = JSON.parse(localStorage.getItem("releaseData") || "[]");
-    const tableBody = document.querySelector("#buildTable tbody");
-    tableBody.innerHTML = ""; // Clear old rows
-    savedData.forEach(rowData => {
-        const row = tableBody.insertRow();
-        rowData.forEach((text, index) => {
-            if (index < 5) {  // Only 5 data columns
-                const cell = row.insertCell();
-                cell.textContent = text;
-            }
-        });
-        // Action cell
-        const actionCell = row.insertCell();
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = () => { row.remove(); saveTableData(); };
-        actionCell.appendChild(deleteBtn);
-    });
-}
-
-window.onload = loadTableData;
-
-// Add new row with inputs
-function addRow() {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
-    const row = tableBody.insertRow();
-
-    // Date input
-    const dateCell = row.insertCell();
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateCell.appendChild(dateInput);
-
-    // Build input
-    const buildCell = row.insertCell();
-    const buildInput = document.createElement('input');
-    buildInput.type = 'text';
-    buildInput.placeholder = 'Enter Build';
-    buildCell.appendChild(buildInput);
-
-    // Description input
-    const descCell = row.insertCell();
-    const descInput = document.createElement('input');
-    descInput.type = 'text';
-    descInput.placeholder = 'Enter Description';
-    descCell.appendChild(descInput);
-
-    // Platform dropdown
-    const platformCell = row.insertCell();
-    const platformSelect = document.createElement('select');
-    const platforms = [
-        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-        "WINDOWS-1217556", "VIDAA-1217574"
-    ];
-    platforms.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt;
-        option.textContent = opt;
-        platformSelect.appendChild(option);
-    });
-    platformCell.appendChild(platformSelect);
-
-    // Note input
-    const noteCell = row.insertCell();
-    const noteInput = document.createElement('input');
-    noteInput.type = 'text';
-    noteInput.placeholder = 'Enter Note';
-    noteCell.appendChild(noteInput);
-
-    // Action cell with Save button
-    const actionCell = row.insertCell();
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Save';
-    saveBtn.onclick = () => {
-        dateCell.textContent = dateInput.value;
-        buildCell.textContent = buildInput.value;
-        descCell.textContent = descInput.value;
-        platformCell.textContent = platformSelect.value;
-        noteCell.textContent = noteInput.value;
-
-        // Replace Save button with Delete button
-        actionCell.innerHTML = '';
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => { row.remove(); saveTableData(); };
-        actionCell.appendChild(deleteBtn);
-
-        saveTableData();
+  <script>
+    // Load saved data when page opens
+    window.onload = function() {
+      loadTableData();
     };
-    actionCell.appendChild(saveBtn);
-}
-</script>
 
+    function addRow(date = "", note = "") {
+      let tableBody = document.getElementById("tableBody");
+      let row = tableBody.insertRow();
+
+      let cell1 = row.insertCell(0);
+      let cell2 = row.insertCell(1);
+      let cell3 = row.insertCell(2);
+
+      cell1.innerHTML = `<input type="date" value="${date}">`;
+      cell2.innerHTML = `<input type="text" value="${note}" placeholder="Enter release note">`;
+      cell3.innerHTML = `
+        <button class="save-btn" onclick="saveData()">Save</button>
+        <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+      `;
+    }
+
+    function saveData() {
+      let tableBody = document.getElementById("tableBody");
+      let rows = tableBody.rows;
+      let savedData = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        let date = rows[i].cells[0].querySelector("input").value;
+        let note = rows[i].cells[1].querySelector("input").value;
+        if (date || note) {
+          savedData.push({ date, note });
+        }
+      }
+
+      localStorage.setItem("releaseData", JSON.stringify(savedData));
+      alert("✅ Data saved!");
+    }
+
+    function loadTableData() {
+      let savedData = JSON.parse(localStorage.getItem("releaseData")) || [];
+      let tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = ""; // clear table before loading
+
+      savedData.forEach(item => {
+        addRow(item.date, item.note);
+      });
+    }
+
+    function deleteRow(button) {
+      let row = button.parentElement.parentElement;
+      row.remove();
+      saveData(); // update storage after deletion
+    }
+  </script>
 </body>
 </html>
