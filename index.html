@@ -1,215 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Release Tracker</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Tracker</title>
+  <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin:0;
-        padding:0;
-        background:#f4f6f8;
-        color:#333;
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
     }
-    header {
-        background:#2F4F4F;
-        color:white;
-        padding:20px 0;
-        text-align:center;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-    header h1 { margin:0; font-size:28px; letter-spacing:1px; }
-    main {
-        padding:20px;
-        max-width:1200px;
-        margin:auto;
+    h2 {
+      text-align: center;
     }
     table {
-        width:100%;
-        border-collapse:collapse;
-        background:#fff;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
     th, td {
-        padding:12px 15px;
-        border:1px solid #ddd;
-        font-size:14px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
     }
-    th { background:#2F4F4F; color:white; text-align:center; }
-    td { text-align:left; }
-    td input, td select {
-        width: 100%;
-        padding:5px;
-        font-size:14px;
-        border:1px solid #ccc;
-        border-radius:4px;
-        box-sizing:border-box;
+    th {
+      background: #007bff;
+      color: white;
     }
-    td.action button {
-        margin: 2px;
-        padding:5px 10px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
+    button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    td.action button:hover { background:#556B2F; }
-    footer {
-        background:#2F4F4F;
-        color:white;
-        text-align:center;
-        padding:15px 0;
-        margin-top:40px;
-        font-size:14px;
-        letter-spacing:0.5px;
+    .save-btn { background: green; color: white; }
+    .edit-btn { background: orange; color: white; }
+    .delete-btn { background: red; color: white; }
+    .add-btn {
+      background: #007bff;
+      color: white;
+      margin-top: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
-    #addRowBtn {
-        margin-top:15px;
-        padding:8px 15px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
-        font-weight:600;
-        transition:0.3s;
-    }
-    #addRowBtn:hover { background:#556B2F; }
-</style>
+  </style>
 </head>
 <body>
+  <h2>Release Tracker</h2>
 
-<header>
-    <h1>Release Tracker</h1>
-</header>
+  <table id="releaseTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Release Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<main>
-    <table id="buildTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Build</th>
-                <th>Description</th>
-                <th>Platform</th>
-                <th>Note</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <button id="addRowBtn" onclick="addRow()">Add New Row</button>
-</main>
+  <button class="add-btn" onclick="addRow()">+ Add Release</button>
 
-<footer>
-    &copy; 2025 Release Tracker. All Rights Reserved.
-</footer>
-
-<script>
-// Load saved data when page opens
-window.onload = loadData;
-
-function addRow(rowData = null) {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
-    const row = tableBody.insertRow();
-
-    const dateCell = row.insertCell();
-    const buildCell = row.insertCell();
-    const descCell = row.insertCell();
-    const platformCell = row.insertCell();
-    const noteCell = row.insertCell();
-    const actionCell = row.insertCell();
-
-    if (rowData) {
-        fillRow(row, rowData);
-    } else {
-        makeEditable(row, true);
+  <script>
+    function loadData() {
+      let data = JSON.parse(localStorage.getItem("releases")) || [];
+      let tbody = document.querySelector("#releaseTable tbody");
+      tbody.innerHTML = "";
+      data.forEach((row, index) => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.date}</td>
+          <td>${row.name}</td>
+          <td>
+            <button class="edit-btn" onclick="editRow(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteRow(${index})">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
     }
-}
 
-function makeEditable(row, isNew = false, rowData = {}) {
-    const cells = row.cells;
-
-    cells[0].innerHTML = `<input type="date" value="${rowData.date || ''}">`;
-    cells[1].innerHTML = `<input type="text" placeholder="Enter Build" value="${rowData.build || ''}">`;
-    cells[2].innerHTML = `<input type="text" placeholder="Enter Description" value="${rowData.desc || ''}">`;
-
-    const platforms = [
-        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-        "WINDOWS-1217556", "VIDAA-1217574"
-    ];
-    let options = platforms.map(p => `<option value="${p}" ${rowData.platform === p ? "selected" : ""}>${p}</option>`).join('');
-    cells[3].innerHTML = `<select>${options}</select>`;
-
-    cells[4].innerHTML = `<input type="text" placeholder="Enter Note" value="${rowData.note || ''}">`;
-
-    const actionCell = cells[5];
-    actionCell.innerHTML = '';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = isNew ? "Save" : "Update";
-    saveBtn.onclick = () => {
-        const data = {
-            date: cells[0].querySelector('input').value,
-            build: cells[1].querySelector('input').value,
-            desc: cells[2].querySelector('input').value,
-            platform: cells[3].querySelector('select').value,
-            note: cells[4].querySelector('input').value
-        };
-        fillRow(row, data);
-        saveData();
-    };
-    actionCell.appendChild(saveBtn);
-}
-
-function fillRow(row, data) {
-    row.cells[0].textContent = data.date;
-    row.cells[1].textContent = data.build;
-    row.cells[2].textContent = data.desc;
-    row.cells[3].textContent = data.platform;
-    row.cells[4].textContent = data.note;
-
-    const actionCell = row.cells[5];
-    actionCell.innerHTML = '';
-
-    
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = "Delete";
-    deleteBtn.onclick = () => {
-        row.remove();
-        saveData();
-    };
-    actionCell.appendChild(deleteBtn);
-}
-
-// Save all rows to localStorage
-function saveData() {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
-    const rows = tableBody.rows;
-    let data = [];
-
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].cells;
-        data.push({
-            date: cells[0].textContent,
-            build: cells[1].textContent,
-            desc: cells[2].textContent,
-            platform: cells[3].textContent,
-            note: cells[4].textContent
-        });
+    function addRow() {
+      let tbody = document.querySelector("#releaseTable tbody");
+      let tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="date" id="dateInput"></td>
+        <td><input type="text" id="nameInput"></td>
+        <td><button class="save-btn" onclick="saveRow(this)">Save</button></td>`;
+      tbody.appendChild(tr);
     }
-    localStorage.setItem("releaseData", JSON.stringify(data));
-}
 
-// Load from localStorage
-function loadData() {
-    const data = JSON.parse(localStorage.getItem("releaseData")) || [];
-    data.forEach(row => addRow(row));
-}
-</script>
+    function saveRow(button) {
+      let tr = button.closest("tr");
+      let date = tr.querySelector("#dateInput").value;
+      let name = tr.querySelector("#nameInput").value;
+      if (!date || !name) {
+        alert("Please enter both date and release name");
+        return;
+      }
 
+      let data = JSON.parse(localStorage.getItem("releases")) || [];
+      data.push({ date, name });
+      localStorage.setItem("releases", JSON.stringify(data));
+      loadData();
+    }
+
+    function editRow(index) {
+      let data = JSON.parse(localStorage.getItem("releases")) || [];
+      let row = data[index];
+
+      let tbody = document.querySelector("#releaseTable tbody");
+      let tr = tbody.children[index];
+      tr.innerHTML = `
+        <td><input type="date" id="dateInput" value="${row.date}"></td>
+        <td><input type="text" id="nameInput" value="${row.name}"></td>
+        <td><button class="save-btn" onclick="updateRow(${index}, this)">Update</button></td>`;
+    }
+
+    function updateRow(index, button) {
+      let tr = button.closest("tr");
+      let date = tr.querySelector("#dateInput").value;
+      let name = tr.querySelector("#nameInput").value;
+      if (!date || !name) {
+        alert("Please enter both date and release name");
+        return;
+      }
+
+      let data = JSON.parse(localStorage.getItem("releases")) || [];
+      data[index] = { date, name };
+      localStorage.setItem("releases", JSON.stringify(data));
+      loadData();
+    }
+
+    function deleteRow(index) {
+      let data = JSON.parse(localStorage.getItem("releases")) || [];
+      data.splice(index, 1);
+      localStorage.setItem("releases", JSON.stringify(data));
+      loadData();
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
