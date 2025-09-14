@@ -5,96 +5,192 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Release Tracker</title>
 <style>
-    body { 
-        font-family: Arial, sans-serif; 
-        padding: 20px; 
-        background: #f0f0f0; 
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin:0;
+        padding:0;
+        background:#f4f6f8;
+        color:#333;
     }
-    h1 { text-align: center; }
-    form { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-    input { padding: 5px; width: 150px; }
-    button { padding: 5px 10px; cursor: pointer; }
-    table { width: 100%; border-collapse: collapse; background: #fff; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #eee; }
-    tbody tr:nth-child(even) { background-color: #f9f9f9; }
+
+    header {
+        background:#2F4F4F;
+        color:white;
+        padding:20px 0;
+        text-align:center;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+    header h1 { margin:0; font-size:28px; letter-spacing:1px; }
+
+    main {
+        padding:20px;
+        max-width:1200px;
+        margin:auto;
+    }
+
+    table {
+        width:100%;
+        border-collapse:collapse;
+        background:#fff;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+        padding:12px 15px;
+        border:1px solid #ddd;
+        font-size:14px;
+    }
+    th 
+    { background:#2F4F4F; color:white; text-align:center; }
+    td { text-align:left; }
+    td input {
+        width: 100%;
+        padding:5px;
+        font-size:14px;
+        border:1px solid #ccc;
+        border-radius:4px;
+        box-sizing:border-box;
+    }
+    td.action button {
+        padding:5px 10px;
+        background:#2F4F4F;
+        color:white;
+        border:none;
+        border-radius:4px;
+        cursor:pointer;
+    }
+    td.action button:hover { background:#556B2F; }
+
+    footer {
+        background:#2F4F4F;
+        color:white;
+        text-align:center;
+        padding:15px 0;
+        margin-top:40px;
+        font-size:14px;
+        letter-spacing:0.5px;
+    }
+    #addRowBtn {
+        margin-top:15px;
+        padding:8px 15px;
+        background:#2F4F4F;
+        color:white;
+        border:none;
+        border-radius:4px;
+        cursor:pointer;
+        font-weight:600;
+        transition:0.3s;
+    }
+    #addRowBtn:hover { background:#556B2F; }
 </style>
 </head>
 <body>
 
-<h1>Release Tracker</h1>
+<header>
+    <h1>Release Tracker</h1>
+</header>
 
-<form id="releaseForm">
-    <input type="date" id="date" required>
-    <input type="text" id="version" placeholder="Version" required>
-    <input type="text" id="description" placeholder="Description" required>
-    <button type="submit">Add Release</button>
-</form>
+<main>
+    <table id="buildTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Build</th>
+                <th>Description</th>
+                <th>Platform</th>
+                <th>Note</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-<table id="releaseTable">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Version</th>
-            <th>Description</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Rows appear here -->
-    </tbody>
-</table>
+    <button id="addRowBtn" onclick="addRow()">Add New Row</button>
+</main>
+
+<footer>
+    &copy; 2025 Release Tracker. All Rights Reserved.
+</footer>
 
 <script>
-// Load data from localStorage or create empty array
-let releases = JSON.parse(localStorage.getItem('releases')) || [];
+function addRow() {
+    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+    const row = tableBody.insertRow();
 
-// Save releases to localStorage
-function saveReleases() {
-    localStorage.setItem('releases', JSON.stringify(releases));
+    // Date input
+    const dateCell = row.insertCell();
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateCell.appendChild(dateInput);
+
+    // Build input
+    const buildCell = row.insertCell();
+    const buildInput = document.createElement('input');
+    buildInput.type = 'text';
+    buildInput.placeholder = 'Enter Build';
+    buildCell.appendChild(buildInput);
+
+    // Description input
+    const descCell = row.insertCell();
+    const descInput = document.createElement('input');
+    descInput.type = 'text';
+    descInput.placeholder = 'Enter Description';
+    descCell.appendChild(descInput);
+
+    // Platform dropdown
+    // const platformCell = row.insertCell();
+    // const platformSelect = document.createElement('select');
+    // const platforms = ["COMCAST-1217563", "COX-1217568", "COMCAST-1217563", "PLATCO-1217572"];
+    // platforms.forEach(opt => {
+    //     const option = document.createElement('option');
+    //     option.value = option.textContent = opt;
+    //     platformSelect.appendChild(option);
+    // });
+    // platformCell.appendChild(platformSelect);
+    const platformCell = row.insertCell();
+   platformCell.innerHTML = `
+  <select>
+    <option>COMCAST-1217563</option>
+    <option>COMCAST-1217563</option>
+    <option>COX-1217568</option>
+    <option>PLATCO-1217572</option>
+    <option>ROGERS-1217570</option>
+    <option>SHAW-1217571</option>
+    <option>VIZIO-1217562</option>
+    <option>SAMSUNG-1217555</option>
+    <option>LG-1217569</option>
+    <option>XBOX-1217569</option>
+    <option>WINDOWS-1217556</option>
+    <option>VIDAA-1217574</option>
+ </select>
+`;
+
+    // Note input
+    const noteCell = row.insertCell();
+    const noteInput = document.createElement('input');
+    noteInput.type = 'text';
+    noteInput.placeholder = 'Enter Note';
+    noteCell.appendChild(noteInput);
+
+    // Action cell with Save button
+    const actionCell = row.insertCell();
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save';
+    saveBtn.onclick = () => {
+        dateCell.textContent = dateInput.value;
+        buildCell.textContent = buildInput.value;
+        descCell.textContent = descInput.value;
+        platformCell.textContent = platformSelect.value;
+        noteCell.textContent = noteInput.value;
+
+        // Replace Save button with Delete button
+        actionCell.innerHTML = '';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => row.remove();
+        actionCell.appendChild(deleteBtn);
+    };
+    actionCell.appendChild(saveBtn);
 }
-
-// Render table rows
-function renderTable() {
-    const tbody = document.querySelector('#releaseTable tbody');
-    tbody.innerHTML = '';
-    releases.forEach((release, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${release.date}</td>
-            <td>${release.version}</td>
-            <td>${release.description}</td>
-            <td><button onclick="deleteRelease(${index})">Delete</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-// Add new release
-document.getElementById('releaseForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const date = document.getElementById('date').value;
-    const version = document.getElementById('version').value.trim();
-    const description = document.getElementById('description').value.trim();
-
-    if(date && version && description) {
-        // Add to beginning for latest on top
-        releases.unshift({date, version, description});
-        saveReleases();
-        renderTable();
-        this.reset();
-    }
-});
-
-// Delete release
-function deleteRelease(index) {
-    releases.splice(index, 1);
-    saveReleases();
-    renderTable();
-}
-
-// Initial table render
-renderTable();
 </script>
 
 </body>
