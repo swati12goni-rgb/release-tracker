@@ -69,8 +69,8 @@
 
       if (saved) {
         // Show text only for saved data
-        cell1.textContent = date;
-        cell2.textContent = note;
+        cell1.textContent = date || "—";   // show dash if no date
+        cell2.textContent = note || "—";
         cell3.innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
       } else {
         // Show input fields for new row
@@ -82,14 +82,17 @@
 
     function saveRow(button) {
       let row = button.parentElement.parentElement;
-      let date = row.cells[0].querySelector("input").value;
-      let note = row.cells[1].querySelector("input").value;
+      let dateInput = row.cells[0].querySelector("input");
+      let noteInput = row.cells[1].querySelector("input");
 
-      if (!date && !note) return; // ignore empty row
+      let date = dateInput ? dateInput.value : "";
+      let note = noteInput ? noteInput.value : "";
+
+      if (!date && !note) return; // ignore completely empty row
 
       // Replace inputs with text
-      row.cells[0].textContent = date;
-      row.cells[1].textContent = note;
+      row.cells[0].textContent = date || "—";
+      row.cells[1].textContent = note || "—";
       row.cells[2].innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
 
       saveData();
@@ -103,7 +106,9 @@
       for (let i = 0; i < rows.length; i++) {
         let date = rows[i].cells[0].textContent;
         let note = rows[i].cells[1].textContent;
-        savedData.push({ date, note });
+        if (date !== "—" || note !== "—") {
+          savedData.push({ date, note });
+        }
       }
 
       localStorage.setItem("releaseData", JSON.stringify(savedData));
