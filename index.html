@@ -5,80 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Release Tracker</title>
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin:0;
-        padding:0;
-        background:#f4f6f8;
-        color:#333;
-    }
-
-    header {
-        background:#2F4F4F;
-        color:white;
-        padding:20px 0;
-        text-align:center;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
+    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:0; background:#f4f6f8; color:#333; }
+    header { background:#2F4F4F; color:white; padding:20px 0; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
     header h1 { margin:0; font-size:28px; letter-spacing:1px; }
-
-    main {
-        padding:20px;
-        max-width:1200px;
-        margin:auto;
-    }
-
-    table {
-        width:100%;
-        border-collapse:collapse;
-        background:#fff;
-        box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-    th, td {
-        padding:12px 15px;
-        border:1px solid #ddd;
-        font-size:14px;
-    }
+    main { padding:20px; max-width:1200px; margin:auto; }
+    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    th, td { padding:12px 15px; border:1px solid #ddd; font-size:14px; }
     th { background:#2F4F4F; color:white; text-align:center; }
     td { text-align:left; }
-    td input, td select {
-        width: 100%;
-        padding:5px;
-        font-size:14px;
-        border:1px solid #ccc;
-        border-radius:4px;
-        box-sizing:border-box;
-    }
-    td.action button {
-        padding:5px 10px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
-    }
+    td input, td select { width: 100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; }
+    td.action button { padding:5px 10px; background:#2F4F4F; color:white; border:none; border-radius:4px; cursor:pointer; }
     td.action button:hover { background:#556B2F; }
-
-    footer {
-        background:#2F4F4F;
-        color:white;
-        text-align:center;
-        padding:15px 0;
-        margin-top:40px;
-        font-size:14px;
-        letter-spacing:0.5px;
-    }
-    #addRowBtn {
-        margin-top:15px;
-        padding:8px 15px;
-        background:#2F4F4F;
-        color:white;
-        border:none;
-        border-radius:4px;
-        cursor:pointer;
-        font-weight:600;
-        transition:0.3s;
-    }
+    footer { background:#2F4F4F; color:white; text-align:center; padding:15px 0; margin-top:40px; font-size:14px; letter-spacing:0.5px; }
+    #addRowBtn { margin-top:15px; padding:8px 15px; background:#2F4F4F; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600; transition:0.3s; }
     #addRowBtn:hover { background:#556B2F; }
 </style>
 </head>
@@ -111,77 +50,83 @@
 </footer>
 
 <script>
+const platforms = [
+    "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+    "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+    "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+    "WINDOWS-1217556", "VIDAA-1217574"
+];
+
+// Save table data to localStorage
 function saveData() {
-    localStorage.setItem("releaseData", document.getElementById("buildTable").querySelector('tbody').innerHTML);
-}
-
-function loadData() {
-    const tableBody = document.getElementById("buildTable").querySelector('tbody');
-    if (localStorage.getItem("releaseData")) {
-        tableBody.innerHTML = localStorage.getItem("releaseData");
-
-        // Reattach delete button events after loading
-        Array.from(tableBody.querySelectorAll('button')).forEach(btn => {
-            if (btn.textContent === 'Delete') {
-                btn.onclick = () => {
-                    btn.closest('tr').remove();
-                    saveData();
-                }
-            }
+    const rows = [];
+    document.querySelectorAll('#buildTable tbody tr').forEach(row => {
+        rows.push({
+            date: row.cells[0].textContent,
+            build: row.cells[1].textContent,
+            desc: row.cells[2].textContent,
+            platform: row.cells[3].textContent,
+            note: row.cells[4].textContent
         });
-    }
+    });
+    localStorage.setItem('releaseData', JSON.stringify(rows));
 }
 
-window.onload = loadData;
+// Load data from localStorage
+function loadData() {
+    const tableBody = document.querySelector('#buildTable tbody');
+    const data = JSON.parse(localStorage.getItem('releaseData') || '[]');
+    data.forEach(item => addRow(item));
+}
 
-function addRow() {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+// Add new row. Pass 'data' to prefill
+function addRow(data = {}) {
+    const tableBody = document.querySelector('#buildTable tbody');
     const row = tableBody.insertRow();
 
-    // Date input
+    // Date
     const dateCell = row.insertCell();
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
+    dateInput.value = data.date || '';
     dateCell.appendChild(dateInput);
 
-    // Build input
+    // Build
     const buildCell = row.insertCell();
     const buildInput = document.createElement('input');
     buildInput.type = 'text';
+    buildInput.value = data.build || '';
     buildInput.placeholder = 'Enter Build';
     buildCell.appendChild(buildInput);
 
-    // Description input
+    // Description
     const descCell = row.insertCell();
     const descInput = document.createElement('input');
     descInput.type = 'text';
+    descInput.value = data.desc || '';
     descInput.placeholder = 'Enter Description';
     descCell.appendChild(descInput);
 
-    // Platform dropdown
+    // Platform
     const platformCell = row.insertCell();
     const platformSelect = document.createElement('select');
-    const platforms = [
-        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-        "WINDOWS-1217556", "VIDAA-1217574"
-    ];
     platforms.forEach(opt => {
         const option = document.createElement('option');
         option.value = option.textContent = opt;
+        if(opt === data.platform) option.selected = true;
         platformSelect.appendChild(option);
     });
     platformCell.appendChild(platformSelect);
 
-    // Note input
+    // Note
     const noteCell = row.insertCell();
     const noteInput = document.createElement('input');
     noteInput.type = 'text';
+    noteInput.value = data.note || '';
     noteInput.placeholder = 'Enter Note';
     noteCell.appendChild(noteInput);
 
-    // Action cell with Save button
+    // Action
     const actionCell = row.insertCell();
     const saveBtn = document.createElement('button');
     saveBtn.textContent = 'Save';
@@ -192,7 +137,6 @@ function addRow() {
         platformCell.textContent = platformSelect.value;
         noteCell.textContent = noteInput.value;
 
-        // Replace Save button with Delete button
         actionCell.innerHTML = '';
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
@@ -201,12 +145,12 @@ function addRow() {
             saveData();
         };
         actionCell.appendChild(deleteBtn);
-
-        // Save to localStorage
         saveData();
     };
     actionCell.appendChild(saveBtn);
 }
+
+window.onload = loadData;
 </script>
 
 </body>
