@@ -4,20 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Release Tracker</title>
-    <script>
-  function saveData() {
-    localStorage.setItem("releaseData", document.getElementById("trackerBody").innerHTML);
-  }
-
-  function loadData() {
-    if (localStorage.getItem("releaseData")) {
-      document.getElementById("trackerBody").innerHTML = localStorage.getItem("releaseData");
-    }
-  }
-
-  window.onload = loadData;
-</script>
-
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -53,10 +39,9 @@
         border:1px solid #ddd;
         font-size:14px;
     }
-    th 
-    { background:#2F4F4F; color:white; text-align:center; }
+    th { background:#2F4F4F; color:white; text-align:center; }
     td { text-align:left; }
-    td input {
+    td input, td select {
         width: 100%;
         padding:5px;
         font-size:14px;
@@ -126,6 +111,29 @@
 </footer>
 
 <script>
+function saveData() {
+    localStorage.setItem("releaseData", document.getElementById("buildTable").querySelector('tbody').innerHTML);
+}
+
+function loadData() {
+    const tableBody = document.getElementById("buildTable").querySelector('tbody');
+    if (localStorage.getItem("releaseData")) {
+        tableBody.innerHTML = localStorage.getItem("releaseData");
+
+        // Reattach delete button events after loading
+        Array.from(tableBody.querySelectorAll('button')).forEach(btn => {
+            if (btn.textContent === 'Delete') {
+                btn.onclick = () => {
+                    btn.closest('tr').remove();
+                    saveData();
+                }
+            }
+        });
+    }
+}
+
+window.onload = loadData;
+
 function addRow() {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
@@ -151,32 +159,20 @@ function addRow() {
     descCell.appendChild(descInput);
 
     // Platform dropdown
-    // const platformCell = row.insertCell();
-    // const platformSelect = document.createElement('select');
-    // const platforms = ["COMCAST-1217563", "COX-1217568", "COMCAST-1217563", "PLATCO-1217572"];
-    // platforms.forEach(opt => {
-    //     const option = document.createElement('option');
-    //     option.value = option.textContent = opt;
-    //     platformSelect.appendChild(option);
-    // });
-    // platformCell.appendChild(platformSelect);
     const platformCell = row.insertCell();
-   platformCell.innerHTML = `
-  <select>
-    <option>COMCAST-1217563</option>
-    <option>COMCAST-1217563</option>
-    <option>COX-1217568</option>
-    <option>PLATCO-1217572</option>
-    <option>ROGERS-1217570</option>
-    <option>SHAW-1217571</option>
-    <option>VIZIO-1217562</option>
-    <option>SAMSUNG-1217555</option>
-    <option>LG-1217569</option>
-    <option>XBOX-1217569</option>
-    <option>WINDOWS-1217556</option>
-    <option>VIDAA-1217574</option>
- </select>
-`;
+    const platformSelect = document.createElement('select');
+    const platforms = [
+        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+        "WINDOWS-1217556", "VIDAA-1217574"
+    ];
+    platforms.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = option.textContent = opt;
+        platformSelect.appendChild(option);
+    });
+    platformCell.appendChild(platformSelect);
 
     // Note input
     const noteCell = row.insertCell();
@@ -200,8 +196,14 @@ function addRow() {
         actionCell.innerHTML = '';
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => row.remove();
+        deleteBtn.onclick = () => {
+            row.remove();
+            saveData();
+        };
         actionCell.appendChild(deleteBtn);
+
+        // Save to localStorage
+        saveData();
     };
     actionCell.appendChild(saveBtn);
 }
@@ -209,4 +211,3 @@ function addRow() {
 
 </body>
 </html>
-
