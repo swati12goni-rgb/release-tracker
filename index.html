@@ -106,6 +106,42 @@
 </footer>
 
 <script>
+// Save table data to localStorage
+function saveTableData() {
+    const tableBody = document.querySelector("#buildTable tbody");
+    const rows = [];
+    tableBody.querySelectorAll("tr").forEach(tr => {
+        const cells = Array.from(tr.querySelectorAll("td")).map(td => td.textContent);
+        rows.push(cells);
+    });
+    localStorage.setItem("releaseData", JSON.stringify(rows));
+}
+
+// Load table data from localStorage
+function loadTableData() {
+    const savedData = JSON.parse(localStorage.getItem("releaseData") || "[]");
+    const tableBody = document.querySelector("#buildTable tbody");
+    tableBody.innerHTML = ""; // Clear old rows
+    savedData.forEach(rowData => {
+        const row = tableBody.insertRow();
+        rowData.forEach((text, index) => {
+            if (index < 5) {  // Only 5 data columns
+                const cell = row.insertCell();
+                cell.textContent = text;
+            }
+        });
+        // Action cell
+        const actionCell = row.insertCell();
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => { row.remove(); saveTableData(); };
+        actionCell.appendChild(deleteBtn);
+    });
+}
+
+window.onload = loadTableData;
+
+// Add new row with inputs
 function addRow() {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
@@ -169,8 +205,10 @@ function addRow() {
         actionCell.innerHTML = '';
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => row.remove();
+        deleteBtn.onclick = () => { row.remove(); saveTableData(); };
         actionCell.appendChild(deleteBtn);
+
+        saveTableData();
     };
     actionCell.appendChild(saveBtn);
 }
