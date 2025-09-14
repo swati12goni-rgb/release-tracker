@@ -51,13 +51,13 @@
 
 <script>
 const platforms = [
-    "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-    "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-    "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-    "WINDOWS-1217556", "VIDAA-1217574"
+    "COMCAST-1217563","COX-1217568","PLATCO-1217572",
+    "ROGERS-1217570","SHAW-1217571","VIZIO-1217562",
+    "SAMSUNG-1217555","LG-1217569","XBOX-1217569",
+    "WINDOWS-1217556","VIDAA-1217574"
 ];
 
-// Save table data to localStorage
+// Save all table rows to localStorage
 function saveData() {
     const rows = [];
     document.querySelectorAll('#buildTable tbody tr').forEach(row => {
@@ -72,14 +72,13 @@ function saveData() {
     localStorage.setItem('releaseData', JSON.stringify(rows));
 }
 
-// Load data from localStorage
+// Load table from localStorage
 function loadData() {
-    const tableBody = document.querySelector('#buildTable tbody');
     const data = JSON.parse(localStorage.getItem('releaseData') || '[]');
     data.forEach(item => addRow(item));
 }
 
-// Add new row. Pass 'data' to prefill
+// Add a new row, optionally pre-filled with data
 function addRow(data = {}) {
     const tableBody = document.querySelector('#buildTable tbody');
     const row = tableBody.insertRow();
@@ -120,38 +119,4 @@ function addRow(data = {}) {
 
     // Note
     const noteCell = row.insertCell();
-    const noteInput = document.createElement('input');
-    noteInput.type = 'text';
-    noteInput.value = data.note || '';
-    noteInput.placeholder = 'Enter Note';
-    noteCell.appendChild(noteInput);
-
-    // Action
-    const actionCell = row.insertCell();
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Save';
-    saveBtn.onclick = () => {
-        dateCell.textContent = dateInput.value;
-        buildCell.textContent = buildInput.value;
-        descCell.textContent = descInput.value;
-        platformCell.textContent = platformSelect.value;
-        noteCell.textContent = noteInput.value;
-
-        actionCell.innerHTML = '';
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => {
-            row.remove();
-            saveData();
-        };
-        actionCell.appendChild(deleteBtn);
-        saveData();
-    };
-    actionCell.appendChild(saveBtn);
-}
-
-window.onload = loadData;
-</script>
-
-</body>
-</html>
+    const noteInput =
