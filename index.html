@@ -1,134 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Release Tracker</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Release Tracker</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin:0;
+        padding:0;
+        background:#f4f6f8;
+        color:#333;
     }
-    h2 {
-      text-align: center;
+    header {
+        background:#2F4F4F;
+        color:white;
+        padding:20px 0;
+        text-align:center;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+    header h1 { margin:0; font-size:28px; letter-spacing:1px; }
+    main {
+        padding:20px;
+        max-width:1200px;
+        margin:auto;
     }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
+        width:100%;
+        border-collapse:collapse;
+        background:#fff;
+        box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
     th, td {
-      padding: 10px;
-      text-align: center;
+        padding:12px 15px;
+        border:1px solid #ddd;
+        font-size:14px;
     }
-    button {
-      padding: 5px 10px;
-      margin: 2px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
+    th { background:#2F4F4F; color:white; text-align:center; }
+    td { text-align:left; }
+    td input, td select {
+        width: 100%;
+        padding:5px;
+        font-size:14px;
+        border:1px solid #ccc;
+        border-radius:4px;
+        box-sizing:border-box;
     }
-    .save-btn { background: #28a745; color: white; }
-    .delete-btn { background: #dc3545; color: white; }
-  </style>
+    td.action button {
+        margin: 2px;
+        padding:5px 10px;
+        background:#2F4F4F;
+        color:white;
+        border:none;
+        border-radius:4px;
+        cursor:pointer;
+    }
+    td.action button:hover { background:#556B2F; }
+    footer {
+        background:#2F4F4F;
+        color:white;
+        text-align:center;
+        padding:15px 0;
+        margin-top:40px;
+        font-size:14px;
+        letter-spacing:0.5px;
+    }
+    #addRowBtn {
+        margin-top:15px;
+        padding:8px 15px;
+        background:#2F4F4F;
+        color:white;
+        border:none;
+        border-radius:4px;
+        cursor:pointer;
+        font-weight:600;
+        transition:0.3s;
+    }
+    #addRowBtn:hover { background:#556B2F; }
+</style>
 </head>
 <body>
-  <h2>📌 Release Tracker</h2>
 
-  <table id="releaseTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Release Note</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+<header>
+    <h1>Release Tracker</h1>
+</header>
 
-  <button onclick="addRow()">➕ Add New Release</button>
+<main>
+    <table id="buildTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Build</th>
+                <th>Description</th>
+                <th>Platform</th>
+                <th>Note</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button id="addRowBtn" onclick="addRow()">Add New Row</button>
+</main>
 
-  <script>
-    // Load saved data when page opens
-    window.onload = function() {
-      loadTableData();
+<footer>
+    &copy; 2025 Release Tracker. All Rights Reserved.
+</footer>
+
+<script>
+// Load saved data when page opens
+window.onload = loadData;
+
+function addRow(rowData = null) {
+    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+    const row = tableBody.insertRow();
+
+    const dateCell = row.insertCell();
+    const buildCell = row.insertCell();
+    const descCell = row.insertCell();
+    const platformCell = row.insertCell();
+    const noteCell = row.insertCell();
+    const actionCell = row.insertCell();
+
+    if (rowData) {
+        fillRow(row, rowData);
+    } else {
+        makeEditable(row, true);
+    }
+}
+
+function makeEditable(row, isNew = false, rowData = {}) {
+    const cells = row.cells;
+
+    cells[0].innerHTML = `<input type="date" value="${rowData.date || ''}">`;
+    cells[1].innerHTML = `<input type="text" placeholder="Enter Build" value="${rowData.build || ''}">`;
+    cells[2].innerHTML = `<input type="text" placeholder="Enter Description" value="${rowData.desc || ''}">`;
+
+    const platforms = [
+        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+        "WINDOWS-1217556", "VIDAA-1217574"
+    ];
+    let options = platforms.map(p => `<option value="${p}" ${rowData.platform === p ? "selected" : ""}>${p}</option>`).join('');
+    cells[3].innerHTML = `<select>${options}</select>`;
+
+    cells[4].innerHTML = `<input type="text" placeholder="Enter Note" value="${rowData.note || ''}">`;
+
+    const actionCell = cells[5];
+    actionCell.innerHTML = '';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = isNew ? "Save" : "Update";
+    saveBtn.onclick = () => {
+        const data = {
+            date: cells[0].querySelector('input').value,
+            build: cells[1].querySelector('input').value,
+            desc: cells[2].querySelector('input').value,
+            platform: cells[3].querySelector('select').value,
+            note: cells[4].querySelector('input').value
+        };
+        fillRow(row, data);
+        saveData();
     };
+    actionCell.appendChild(saveBtn);
+}
 
-    function addRow(date = "", note = "", saved = false) {
-      let tableBody = document.getElementById("tableBody");
-      let row = tableBody.insertRow();
+function fillRow(row, data) {
+    row.cells[0].textContent = data.date;
+    row.cells[1].textContent = data.build;
+    row.cells[2].textContent = data.desc;
+    row.cells[3].textContent = data.platform;
+    row.cells[4].textContent = data.note;
 
-      let cell1 = row.insertCell(0);
-      let cell2 = row.insertCell(1);
-      let cell3 = row.insertCell(2);
+    const actionCell = row.cells[5];
+    actionCell.innerHTML = '';
 
-      if (saved) {
-        // Show text only for saved data
-        cell1.textContent = date || "—";   // show dash if no date
-        cell2.textContent = note || "—";
-        cell3.innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
-      } else {
-        // Show input fields for new row
-        cell1.innerHTML = `<input type="date" value="${date}">`;
-        cell2.innerHTML = `<input type="text" value="${note}" placeholder="Enter release note">`;
-        cell3.innerHTML = `<button class="save-btn" onclick="saveRow(this)">Save</button>`;
-      }
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = () => {
+        row.remove();
+        saveData();
+    };
+    actionCell.appendChild(deleteBtn);
+}
+
+// Save all rows to localStorage
+function saveData() {
+    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+    const rows = tableBody.rows;
+    let data = [];
+
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].cells;
+        data.push({
+            date: cells[0].textContent,
+            build: cells[1].textContent,
+            desc: cells[2].textContent,
+            platform: cells[3].textContent,
+            note: cells[4].textContent
+        });
     }
+    localStorage.setItem("releaseData", JSON.stringify(data));
+}
 
-    function saveRow(button) {
-      let row = button.parentElement.parentElement;
-      let dateInput = row.cells[0].querySelector("input");
-      let noteInput = row.cells[1].querySelector("input");
+// Load from localStorage
+function loadData() {
+    const data = JSON.parse(localStorage.getItem("releaseData")) || [];
+    data.forEach(row => addRow(row));
+}
+</script>
 
-      let date = dateInput ? dateInput.value : "";
-      let note = noteInput ? noteInput.value : "";
-
-      if (!date && !note) return; // ignore completely empty row
-
-      // Replace inputs with text
-      row.cells[0].textContent = date || "—";
-      row.cells[1].textContent = note || "—";
-      row.cells[2].innerHTML = `<button class="delete-btn" onclick="deleteRow(this)">Delete</button>`;
-
-      saveData();
-    }
-
-    function saveData() {
-      let tableBody = document.getElementById("tableBody");
-      let rows = tableBody.rows;
-      let savedData = [];
-
-      for (let i = 0; i < rows.length; i++) {
-        let date = rows[i].cells[0].textContent;
-        let note = rows[i].cells[1].textContent;
-        if (date !== "—" || note !== "—") {
-          savedData.push({ date, note });
-        }
-      }
-
-      localStorage.setItem("releaseData", JSON.stringify(savedData));
-    }
-
-    function loadTableData() {
-      let savedData = JSON.parse(localStorage.getItem("releaseData")) || [];
-      let tableBody = document.getElementById("tableBody");
-      tableBody.innerHTML = "";
-
-      savedData.forEach(item => {
-        addRow(item.date, item.note, true);
-      });
-    }
-
-    function deleteRow(button) {
-      let row = button.parentElement.parentElement;
-      row.remove();
-      saveData();
-    }
-  </script>
 </body>
 </html>
