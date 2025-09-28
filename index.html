@@ -12,7 +12,6 @@
         background:#f4f6f8;
         color:#333;
     }
-
     header {
         background:#2F4F4F;
         color:white;
@@ -27,7 +26,6 @@
         max-width:1200px;
         margin:auto;
     }
-
     table {
         width:100%;
         border-collapse:collapse;
@@ -39,10 +37,9 @@
         border:1px solid #ddd;
         font-size:14px;
     }
-    th 
-    { background:#2F4F4F; color:white; text-align:center; }
+    th { background:#2F4F4F; color:white; text-align:center; }
     td { text-align:left; }
-    td input {
+    td input, td select {
         width: 100%;
         padding:5px;
         font-size:14px;
@@ -112,6 +109,29 @@
 </footer>
 
 <script>
+const STORAGE_KEY = "releaseTrackerData";
+
+// Load saved data from localStorage
+window.onload = function() {
+    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    savedData.forEach(item => addSavedRow(item));
+};
+
+function saveToLocalStorage() {
+    const rows = [];
+    document.querySelectorAll("#buildTable tbody tr").forEach(tr => {
+        const cells = tr.querySelectorAll("td");
+        rows.push({
+            date: cells[0].textContent,
+            build: cells[1].textContent,
+            description: cells[2].textContent,
+            platform: cells[3].textContent,
+            note: cells[4].textContent
+        });
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+}
+
 function addRow() {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
@@ -137,32 +157,20 @@ function addRow() {
     descCell.appendChild(descInput);
 
     // Platform dropdown
-    // const platformCell = row.insertCell();
-    // const platformSelect = document.createElement('select');
-    // const platforms = ["COMCAST-1217563", "COX-1217568", "COMCAST-1217563", "PLATCO-1217572"];
-    // platforms.forEach(opt => {
-    //     const option = document.createElement('option');
-    //     option.value = option.textContent = opt;
-    //     platformSelect.appendChild(option);
-    // });
-    // platformCell.appendChild(platformSelect);
     const platformCell = row.insertCell();
-   platformCell.innerHTML = `
-  <select>
-    <option>COMCAST-1217563</option>
-    <option>COMCAST-1217563</option>
-    <option>COX-1217568</option>
-    <option>PLATCO-1217572</option>
-    <option>ROGERS-1217570</option>
-    <option>SHAW-1217571</option>
-    <option>VIZIO-1217562</option>
-    <option>SAMSUNG-1217555</option>
-    <option>LG-1217569</option>
-    <option>XBOX-1217569</option>
-    <option>WINDOWS-1217556</option>
-    <option>VIDAA-1217574</option>
- </select>
-`;
+    const platformSelect = document.createElement('select');
+    const platforms = [
+        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+        "WINDOWS-1217556", "VIDAA-1217574"
+    ];
+    platforms.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = option.textContent = opt;
+        platformSelect.appendChild(option);
+    });
+    platformCell.appendChild(platformSelect);
 
     // Note input
     const noteCell = row.insertCell();
@@ -176,20 +184,37 @@ function addRow() {
     const saveBtn = document.createElement('button');
     saveBtn.textContent = 'Save';
     saveBtn.onclick = () => {
-        dateCell.textContent = dateInput.value;
-        buildCell.textContent = buildInput.value;
-        descCell.textContent = descInput.value;
-        platformCell.textContent = platformSelect.value;
-        noteCell.textContent = noteInput.value;
-
-        // Replace Save button with Delete button
-        actionCell.innerHTML = '';
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => row.remove();
-        actionCell.appendChild(deleteBtn);
+        addSavedRow({
+            date: dateInput.value,
+            build: buildInput.value,
+            description: descInput.value,
+            platform: platformSelect.value,
+            note: noteInput.value
+        });
+        row.remove();
+        saveToLocalStorage();
     };
     actionCell.appendChild(saveBtn);
+}
+
+function addSavedRow(data) {
+    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+    const row = tableBody.insertRow();
+
+    row.insertCell().textContent = data.date;
+    row.insertCell().textContent = data.build;
+    row.insertCell().textContent = data.description;
+    row.insertCell().textContent = data.platform;
+    row.insertCell().textContent = data.note;
+
+    const actionCell = row.insertCell();
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => {
+        row.remove();
+        saveToLocalStorage();
+    };
+    actionCell.appendChild(deleteBtn);
 }
 </script>
 
