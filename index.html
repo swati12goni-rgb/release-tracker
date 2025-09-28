@@ -39,10 +39,9 @@
         border:1px solid #ddd;
         font-size:14px;
     }
-    th 
-    { background:#2F4F4F; color:white; text-align:center; }
+    th { background:#2F4F4F; color:white; text-align:center; }
     td { text-align:left; }
-    td input {
+    td input, td select {
         width: 100%;
         padding:5px;
         font-size:14px;
@@ -69,7 +68,7 @@
         font-size:14px;
         letter-spacing:0.5px;
     }
-    #addRowBtn {
+    #addRowBtn, #clearBtn {
         margin-top:15px;
         padding:8px 15px;
         background:#2F4F4F;
@@ -80,7 +79,7 @@
         font-weight:600;
         transition:0.3s;
     }
-    #addRowBtn:hover { background:#556B2F; }
+    #addRowBtn:hover, #clearBtn:hover { background:#556B2F; }
 </style>
 </head>
 <body>
@@ -105,6 +104,7 @@
     </table>
 
     <button id="addRowBtn" onclick="addRow()">Add New Row</button>
+    <button id="clearBtn" onclick="clearAll()">Clear All</button>
 </main>
 
 <footer>
@@ -112,6 +112,29 @@
 </footer>
 
 <script>
+function saveTable() {
+    localStorage.setItem("releaseData", document.getElementById('buildTable').innerHTML);
+}
+
+function loadTable() {
+    const saved = localStorage.getItem("releaseData");
+    if (saved) {
+        document.getElementById('buildTable').innerHTML = saved;
+
+        // Reattach delete buttons
+        document.querySelectorAll("#buildTable tbody tr").forEach(row => {
+            const actionCell = row.lastElementChild;
+            const deleteBtn = actionCell.querySelector("button");
+            if (deleteBtn) {
+                deleteBtn.onclick = () => {
+                    row.remove();
+                    saveTable();
+                };
+            }
+        });
+    }
+}
+
 function addRow() {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
@@ -137,32 +160,20 @@ function addRow() {
     descCell.appendChild(descInput);
 
     // Platform dropdown
-    // const platformCell = row.insertCell();
-    // const platformSelect = document.createElement('select');
-    // const platforms = ["COMCAST-1217563", "COX-1217568", "COMCAST-1217563", "PLATCO-1217572"];
-    // platforms.forEach(opt => {
-    //     const option = document.createElement('option');
-    //     option.value = option.textContent = opt;
-    //     platformSelect.appendChild(option);
-    // });
-    // platformCell.appendChild(platformSelect);
     const platformCell = row.insertCell();
-   platformCell.innerHTML = `
-  <select>
-    <option>COMCAST-1217563</option>
-    <option>COMCAST-1217563</option>
-    <option>COX-1217568</option>
-    <option>PLATCO-1217572</option>
-    <option>ROGERS-1217570</option>
-    <option>SHAW-1217571</option>
-    <option>VIZIO-1217562</option>
-    <option>SAMSUNG-1217555</option>
-    <option>LG-1217569</option>
-    <option>XBOX-1217569</option>
-    <option>WINDOWS-1217556</option>
-    <option>VIDAA-1217574</option>
- </select>
-`;
+    const platformSelect = document.createElement('select');
+    const platforms = [
+        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+        "WINDOWS-1217556", "VIDAA-1217574"
+    ];
+    platforms.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = option.textContent = opt;
+        platformSelect.appendChild(option);
+    });
+    platformCell.appendChild(platformSelect);
 
     // Note input
     const noteCell = row.insertCell();
@@ -173,6 +184,7 @@ function addRow() {
 
     // Action cell with Save button
     const actionCell = row.insertCell();
+    actionCell.classList.add("action");
     const saveBtn = document.createElement('button');
     saveBtn.textContent = 'Save';
     saveBtn.onclick = () => {
@@ -186,11 +198,25 @@ function addRow() {
         actionCell.innerHTML = '';
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => row.remove();
+        deleteBtn.onclick = () => {
+            row.remove();
+            saveTable();
+        };
         actionCell.appendChild(deleteBtn);
+
+        saveTable();
     };
     actionCell.appendChild(saveBtn);
 }
+
+function clearAll() {
+    if (confirm("Are you sure you want to clear all saved data?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+window.onload = loadTable;
 </script>
 
 </body>
