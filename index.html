@@ -12,6 +12,7 @@
         background:#f4f6f8;
         color:#333;
     }
+
     header {
         background:#2F4F4F;
         color:white;
@@ -20,11 +21,13 @@
         box-shadow:0 2px 5px rgba(0,0,0,0.1);
     }
     header h1 { margin:0; font-size:28px; letter-spacing:1px; }
+
     main {
         padding:20px;
         max-width:1200px;
         margin:auto;
     }
+
     table {
         width:100%;
         border-collapse:collapse;
@@ -36,9 +39,10 @@
         border:1px solid #ddd;
         font-size:14px;
     }
-    th { background:#2F4F4F; color:white; text-align:center; }
+    th 
+    { background:#2F4F4F; color:white; text-align:center; }
     td { text-align:left; }
-    td input, td select {
+    td input {
         width: 100%;
         padding:5px;
         font-size:14px;
@@ -47,7 +51,6 @@
         box-sizing:border-box;
     }
     td.action button {
-        margin: 2px;
         padding:5px 10px;
         background:#2F4F4F;
         color:white;
@@ -56,6 +59,7 @@
         cursor:pointer;
     }
     td.action button:hover { background:#556B2F; }
+
     footer {
         background:#2F4F4F;
         color:white;
@@ -99,6 +103,7 @@
         </thead>
         <tbody></tbody>
     </table>
+
     <button id="addRowBtn" onclick="addRow()">Add New Row</button>
 </main>
 
@@ -107,101 +112,85 @@
 </footer>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw92PcEUvcEhJl4LX7L-XzFBJuReueGb48Eo0mecx5T7eItcXqMmk-LgOLIaWKNn_tj/exec";
-    // replace with your Apps Script URL
+function addRow() {
+    const tableBody = document.getElementById('buildTable').querySelector('tbody');
+    const row = tableBody.insertRow();
 
-    window.onload = loadData;
+    // Date input
+    const dateCell = row.insertCell();
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateCell.appendChild(dateInput);
 
-    function addRow(rowData = null) {
-        const tableBody = document.getElementById('buildTable').querySelector('tbody');
-        const row = tableBody.insertRow();
+    // Build input
+    const buildCell = row.insertCell();
+    const buildInput = document.createElement('input');
+    buildInput.type = 'text';
+    buildInput.placeholder = 'Enter Build';
+    buildCell.appendChild(buildInput);
 
-        for (let i = 0; i < 6; i++) row.insertCell();
+    // Description input
+    const descCell = row.insertCell();
+    const descInput = document.createElement('input');
+    descInput.type = 'text';
+    descInput.placeholder = 'Enter Description';
+    descCell.appendChild(descInput);
 
-        if (rowData) {
-            fillRow(row, rowData);
-        } else {
-            makeEditable(row, true);
-        }
-    }
+    // Platform dropdown
+    // const platformCell = row.insertCell();
+    // const platformSelect = document.createElement('select');
+    // const platforms = ["COMCAST-1217563", "COX-1217568", "COMCAST-1217563", "PLATCO-1217572"];
+    // platforms.forEach(opt => {
+    //     const option = document.createElement('option');
+    //     option.value = option.textContent = opt;
+    //     platformSelect.appendChild(option);
+    // });
+    // platformCell.appendChild(platformSelect);
+    const platformCell = row.insertCell();
+   platformCell.innerHTML = `
+  <select>
+    <option>COMCAST-1217563</option>
+    <option>COMCAST-1217563</option>
+    <option>COX-1217568</option>
+    <option>PLATCO-1217572</option>
+    <option>ROGERS-1217570</option>
+    <option>SHAW-1217571</option>
+    <option>VIZIO-1217562</option>
+    <option>SAMSUNG-1217555</option>
+    <option>LG-1217569</option>
+    <option>XBOX-1217569</option>
+    <option>WINDOWS-1217556</option>
+    <option>VIDAA-1217574</option>
+ </select>
+`;
 
-    function makeEditable(row, isNew = false, rowData = {}) {
-        const cells = row.cells;
+    // Note input
+    const noteCell = row.insertCell();
+    const noteInput = document.createElement('input');
+    noteInput.type = 'text';
+    noteInput.placeholder = 'Enter Note';
+    noteCell.appendChild(noteInput);
 
-        cells[0].innerHTML = `<input type="date" value="${rowData.date || ''}">`;
-        cells[1].innerHTML = `<input type="text" placeholder="Enter Build" value="${rowData.build || ''}">`;
-        cells[2].innerHTML = `<input type="text" placeholder="Enter Description" value="${rowData.desc || ''}">`;
+    // Action cell with Save button
+    const actionCell = row.insertCell();
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save';
+    saveBtn.onclick = () => {
+        dateCell.textContent = dateInput.value;
+        buildCell.textContent = buildInput.value;
+        descCell.textContent = descInput.value;
+        platformCell.textContent = platformSelect.value;
+        noteCell.textContent = noteInput.value;
 
-        const platforms = [
-            "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-            "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-            "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-            "WINDOWS-1217556", "VIDAA-1217574"
-        ];
-        let options = platforms.map(p => `<option value="${p}" ${rowData.platform === p ? "selected" : ""}>${p}</option>`).join('');
-        cells[3].innerHTML = `<select>${options}</select>`;
-
-        cells[4].innerHTML = `<input type="text" placeholder="Enter Note" value="${rowData.note || ''}">`;
-
-        const actionCell = cells[5];
+        // Replace Save button with Delete button
         actionCell.innerHTML = '';
-
-        const saveBtn = document.createElement('button');
-        saveBtn.textContent = isNew ? "Save" : "Update";
-        saveBtn.onclick = async () => {
-            const data = {
-                date: cells[0].querySelector('input').value,
-                build: cells[1].querySelector('input').value,
-                desc: cells[2].querySelector('input').value,
-                platform: cells[3].querySelector('select').value,
-                note: cells[4].querySelector('input').value
-            };
-            await saveData(data);
-            location.reload();
-        };
-        actionCell.appendChild(saveBtn);
-    }
-
-    function fillRow(row, data) {
-        row.cells[0].textContent = data[0];
-        row.cells[1].textContent = data[1];
-        row.cells[2].textContent = data[2];
-        row.cells[3].textContent = data[3];
-        row.cells[4].textContent = data[4];
-
-        const actionCell = row.cells[5];
-        actionCell.innerHTML = '';
-
         const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = async () => {
-            if (confirm("Are you sure you want to delete this row?")) {
-                await deleteData(data[1]); // using "Build" as unique identifier
-                row.remove();
-            }
-        };
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => row.remove();
         actionCell.appendChild(deleteBtn);
-    }
-
-    async function saveData(data) {
-        await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "add", data })
-        });
-    }
-
-    async function deleteData(buildId) {
-        await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "delete", build: buildId })
-        });
-    }
-
-    async function loadData() {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        data.slice(1).forEach(row => addRow(row));
-    }
+    };
+    actionCell.appendChild(saveBtn);
+}
 </script>
 
 </body>
