@@ -107,98 +107,97 @@
 </footer>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbw92PcEUvcEhJl4LX7L-XzFBJuReueGb48Eo0mecx5T7eItcXqMmk-LgOLIaWKNn_tj/exec";
-// replace with your script URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbw92PcEUvcEhJl4LX7L-XzFBJuReueGb48Eo0mecx5T7eItcXqMmk-LgOLIaWKNn_tj/exec";
+    // replace with your own Apps Script web app URL
 
-window.onload = loadData;
+    window.onload = loadData;
 
-function addRow(rowData = null) {
-    const tableBody = document.getElementById('buildTable').querySelector('tbody');
-    const row = tableBody.insertRow();
+    function addRow(rowData = null) {
+        const tableBody = document.getElementById('buildTable').querySelector('tbody');
+        const row = tableBody.insertRow();
 
-    const dateCell = row.insertCell();
-    const buildCell = row.insertCell();
-    const descCell = row.insertCell();
-    const platformCell = row.insertCell();
-    const noteCell = row.insertCell();
-    const actionCell = row.insertCell();
+        const dateCell = row.insertCell();
+        const buildCell = row.insertCell();
+        const descCell = row.insertCell();
+        const platformCell = row.insertCell();
+        const noteCell = row.insertCell();
+        const actionCell = row.insertCell();
 
-    if (rowData) {
-        fillRow(row, rowData);
-    } else {
-        makeEditable(row, true);
+        if (rowData) {
+            fillRow(row, rowData);
+        } else {
+            makeEditable(row, true);
+        }
     }
-}
 
-function makeEditable(row, isNew = false, rowData = {}) {
-    const cells = row.cells;
+    function makeEditable(row, isNew = false, rowData = {}) {
+        const cells = row.cells;
 
-    cells[0].innerHTML = `<input type="date" value="${rowData.date || ''}">`;
-    cells[1].innerHTML = `<input type="text" placeholder="Enter Build" value="${rowData.build || ''}">`;
-    cells[2].innerHTML = `<input type="text" placeholder="Enter Description" value="${rowData.desc || ''}">`;
+        cells[0].innerHTML = `<input type="date" value="${rowData.date || ''}">`;
+        cells[1].innerHTML = `<input type="text" placeholder="Enter Build" value="${rowData.build || ''}">`;
+        cells[2].innerHTML = `<input type="text" placeholder="Enter Description" value="${rowData.desc || ''}">`;
 
-    const platforms = [
-        "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
-        "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
-        "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
-        "WINDOWS-1217556", "VIDAA-1217574"
-    ];
-    let options = platforms.map(p => `<option value="${p}" ${rowData.platform === p ? "selected" : ""}>${p}</option>`).join('');
-    cells[3].innerHTML = `<select>${options}</select>`;
+        const platforms = [
+            "COMCAST-1217563", "COX-1217568", "PLATCO-1217572",
+            "ROGERS-1217570", "SHAW-1217571", "VIZIO-1217562",
+            "SAMSUNG-1217555", "LG-1217569", "XBOX-1217569",
+            "WINDOWS-1217556", "VIDAA-1217574"
+        ];
+        let options = platforms.map(p => `<option value="${p}" ${rowData.platform === p ? "selected" : ""}>${p}</option>`).join('');
+        cells[3].innerHTML = `<select>${options}</select>`;
 
-    cells[4].innerHTML = `<input type="text" placeholder="Enter Note" value="${rowData.note || ''}">`;
+        cells[4].innerHTML = `<input type="text" placeholder="Enter Note" value="${rowData.note || ''}">`;
 
-    const actionCell = cells[5];
-    actionCell.innerHTML = '';
+        const actionCell = cells[5];
+        actionCell.innerHTML = '';
 
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = isNew ? "Save" : "Update";
-    saveBtn.onclick = async () => {
-        const data = {
-            date: cells[0].querySelector('input').value,
-            build: cells[1].querySelector('input').value,
-            desc: cells[2].querySelector('input').value,
-            platform: cells[3].querySelector('select').value,
-            note: cells[4].querySelector('input').value
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = isNew ? "Save" : "Update";
+        saveBtn.onclick = async () => {
+            const data = {
+                date: cells[0].querySelector('input').value,
+                build: cells[1].querySelector('input').value,
+                desc: cells[2].querySelector('input').value,
+                platform: cells[3].querySelector('select').value,
+                note: cells[4].querySelector('input').value
+            };
+            await saveData(data);
+            location.reload();
         };
-        await saveData(data);
-        location.reload();
-    };
-    actionCell.appendChild(saveBtn);
-}
+        actionCell.appendChild(saveBtn);
+    }
 
-function fillRow(row, data) {
-    row.cells[0].textContent = data[0];
-    row.cells[1].textContent = data[1];
-    row.cells[2].textContent = data[2];
-    row.cells[3].textContent = data[3];
-    row.cells[4].textContent = data[4];
+    function fillRow(row, data) {
+        row.cells[0].textContent = data[0];
+        row.cells[1].textContent = data[1];
+        row.cells[2].textContent = data[2];
+        row.cells[3].textContent = data[3];
+        row.cells[4].textContent = data[4];
 
-    const actionCell = row.cells[5];
-    actionCell.innerHTML = '';
+        const actionCell = row.cells[5];
+        actionCell.innerHTML = '';
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = "Delete";
-    deleteBtn.onclick = () => {
-        row.remove();
-    };
-    actionCell.appendChild(deleteBtn);
-}
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => {
+            row.remove();
+        };
+        actionCell.appendChild(deleteBtn);
+    }
 
-async function saveData(data) {
-    await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(data)
-    });
-}
+    async function saveData(data) {
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+    }
 
-async function loadData() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    data.slice(1).forEach(row => addRow(row));
-}
+    async function loadData() {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        data.slice(1).forEach(row => addRow(row));
+    }
 </script>
 
 </body>
 </html>
-
