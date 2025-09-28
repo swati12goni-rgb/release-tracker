@@ -111,12 +111,13 @@
 <script>
 const STORAGE_KEY = "releaseTrackerData";
 
-// Load saved data from localStorage
+// Load saved data when page opens
 window.onload = function() {
     const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     savedData.forEach(item => addSavedRow(item));
 };
 
+// Save all rows to localStorage
 function saveToLocalStorage() {
     const rows = [];
     document.querySelectorAll("#buildTable tbody tr").forEach(tr => {
@@ -132,6 +133,7 @@ function saveToLocalStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
 }
 
+// Add a new editable row
 function addRow() {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
@@ -197,6 +199,7 @@ function addRow() {
     actionCell.appendChild(saveBtn);
 }
 
+// Add a saved row (plain text + delete button)
 function addSavedRow(data) {
     const tableBody = document.getElementById('buildTable').querySelector('tbody');
     const row = tableBody.insertRow();
